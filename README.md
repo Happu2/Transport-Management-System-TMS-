@@ -40,7 +40,7 @@
 
 ### Access Links:
 
-* **Swagger/OpenAPI Documentation URL (Live Link):**
+* **Swagger/OpenAPI Documentation URL:**
     `http://localhost:8080/swagger-ui/index.html`
 
 ### Setup and Run Instructions:
