@@ -23,6 +23,7 @@ public class TransporterService {
 
     @Transactional
     public TransporterResponse create(TransporterCreateRequest req) {
+        // 1. Map DTOs to transient AvailableTruck entities
         List<AvailableTruck> trucks = req.availableTrucks().stream()
                 .map(t -> AvailableTruck.builder()
                         .truckType(t.truckType())
@@ -30,12 +31,22 @@ public class TransporterService {
                         .build())
                 .toList();
 
+        // 2. Build the Transporter entity
         Transporter t = Transporter.builder()
                 .companyName(req.companyName())
                 .rating(req.rating())
-                .availableTrucks(trucks)
+                .availableTrucks(trucks) // Set the list of transient trucks
                 .build();
 
+        // 3. ⭐ CRITICAL FIX: Set the back-reference (parent on the child)
+        if (t.getAvailableTrucks() != null) {
+            for (AvailableTruck truck : t.getAvailableTrucks()) {
+                // This prevents TransientPropertyValueException
+                truck.setTransporter(t);
+            }
+        }
+
+        // 4. Save the Transporter (Hibernate cascades save to AvailableTrucks)
         return TransporterResponse.from(transporterRepository.save(t));
     }
 
@@ -46,6 +57,7 @@ public class TransporterService {
     @Transactional
     public void updateTrucks(UUID id, TruckType type, int count) {
         Transporter t = find(id);
+        // It's safer to operate on a mutable copy of the collection
         List<AvailableTruck> list = new ArrayList<>(t.getAvailableTrucks());
 
         boolean found = false;
@@ -57,7 +69,10 @@ public class TransporterService {
             }
         }
         if (!found) {
-            list.add(AvailableTruck.builder().truckType(type).count(count).build());
+            // New truck created, MUST set the back-reference here too
+            AvailableTruck newTruck = AvailableTruck.builder().truckType(type).count(count).build();
+            newTruck.setTransporter(t); // ⭐ Added for updates
+            list.add(newTruck);
         }
         t.setAvailableTrucks(list);
         transporterRepository.save(t);
@@ -102,7 +117,10 @@ public class TransporterService {
             }
         }
         if (!found) {
-            list.add(AvailableTruck.builder().truckType(type).count(count).build());
+            // New truck created, MUST set the back-reference here too
+            AvailableTruck newTruck = AvailableTruck.builder().truckType(type).count(count).build();
+            newTruck.setTransporter(t); // ⭐ Added for restores
+            list.add(newTruck);
         }
         t.setAvailableTrucks(list);
         transporterRepository.save(t);
