@@ -8,7 +8,7 @@
 
 [cite_start]The database design uses five core entities (`Load`, `Bid`, `Transporter`, `Booking`, `Shipper`) and enforces relationships through Foreign Keys[cite: 120].
 
-![](/original.png)
+![](/package.png)
 
 ---
 
