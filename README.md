@@ -30,7 +30,7 @@
 
 [cite_start]Adequate unit test coverage (JUnit 5 + Mockito) was maintained, focusing heavily on the **Service Layer** to ensure all critical business rules and edge cases are handled[cite: 144, 160].
 
-**(Please insert the screenshot showing your test coverage percentage here, specifically targeting the Service layer.)**
+![](/testcoverage.png)
 
 ---
 
